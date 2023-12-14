@@ -6,6 +6,7 @@ from flask import (Flask,
                    render_template,
                    jsonify,
                    request)
+from config import API_VERSION
 print('import success')
 # load models
 Sex_LE = pickle.load(open('../flaskApp/tech_models/Sex_LE.pkl', 'rb'))
@@ -74,6 +75,22 @@ def main():
 
 @app.route('/api/v1/add_message/', methods=['POST', 'GET'])
 def api_message():
+    get_message_x = request.json  # получили json с другого сервиса
+    # подалди уже отмасштабированные данные
+    predict = gaussNB.predict(get_message_x['X_scaled'])
+    print(predict)
+    if predict == 0:
+        result = 'not survived'
+    else:
+        result = 'survived'
+
+    # прогноз возвращение в сервис. который запросил
+    return jsonify(str(result))
+
+
+# вариант с версионностью API
+@app.route(f'/api/{API_VERSION}/add_message/', methods=['POST', 'GET'])
+def api_message_v3():
     get_message_x = request.json  # получили json с другого сервиса
     # подалди уже отмасштабированные данные
     predict = gaussNB.predict(get_message_x['X_scaled'])
